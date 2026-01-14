@@ -417,8 +417,8 @@ export default function MobileHome() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {}}
       />
-
       <PasswordMenuModal
         isOpen={isPasswordMenuOpen}
         onClose={() => setIsPasswordMenuOpen(false)}
@@ -485,6 +485,7 @@ export default function MobileHome() {
         onClose={() => setIsBudgetViewModalOpen(false)}
         transactions={transactions}
         onDelete={deleteTransaction}
+        stats={stats}
       />
 
       <RecurringModal
