@@ -6,8 +6,18 @@ import { Plus, Sparkles, Zap, Lock, Skull, LogIn, LogOut, User } from 'lucide-re
 import PasswordModal from './components/PasswordModal'
 import PasswordMenuModal from './components/PasswordMenuModal'
 import PasswordListModal from './components/PasswordListModal'
+import BudgetModal from './components/BudgetModal'
+import BudgetMenuModal from './components/BudgetMenuModal'
+import BudgetViewModal from './components/BudgetViewModal'
+import RecurringModal from './components/RecurringModal'
+import RecurringListModal from './components/RecurringListModal'
+import BudgetLimitModal from './components/BudgetLimitModal'
+import BudgetLimitsViewModal from './components/BudgetLimitsViewModal'
 import AuthModal from './components/AuthModal'
 import { usePasswords } from './hooks/usePasswords'
+import { useBudget } from './hooks/useBudget'
+import { useRecurring } from './hooks/useRecurring'
+import { useBudgetLimits } from './hooks/useBudgetLimits'
 import { supabase } from '@/lib/supabase'
 import { initConsoleGuard } from '@/lib/console-guard'
 
@@ -24,10 +34,20 @@ export default function Home() {
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isListModalOpen, setIsListModalOpen] = useState(false)
+  const [isBudgetMenuModalOpen, setIsBudgetMenuModalOpen] = useState(false)
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false)
+  const [isBudgetViewModalOpen, setIsBudgetViewModalOpen] = useState(false)
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false)
+  const [isRecurringListModalOpen, setIsRecurringListModalOpen] = useState(false)
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false)
+  const [isLimitsViewModalOpen, setIsLimitsViewModalOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<any>(null)
   const [consoleGuard, setConsoleGuard] = useState<any>(null)
   const { passwords, addPassword, user, deletePassword } = usePasswords()
+  const { transactions, addTransaction, deleteTransaction, getStats } = useBudget()
+  const { recurring, addRecurring, deleteRecurring, toggleActive } = useRecurring()
+  const { limits, limitsStatus, addLimit, deleteLimit, toggleActive: toggleLimitActive } = useBudgetLimits()
 
   // Initialize console guard once
   useEffect(() => {
@@ -84,6 +104,13 @@ export default function Home() {
       description: `🔥 VAULT ULTRA SEGRETO! Modalità sicurezza massima attivata! Le tue password sono protette dal potere dell'anime! 💀✨ (${passwords.length} password salvate)`, 
       icon: Skull, 
       gradient: 'from-red-600 via-orange-500 to-yellow-400' 
+    },
+    { 
+      id: 'budget', 
+      title: '💰 BILANCIO FAMILIARE 💰', 
+      description: '💸 Gestisci entrate e uscite della famiglia! Tieni traccia di ogni transazione e monitora il tuo budget mensile! 📊✨', 
+      icon: Zap, 
+      gradient: 'from-green-600 via-emerald-500 to-teal-400' 
     },
   ]
 
@@ -359,7 +386,13 @@ export default function Home() {
                     }}
                     onHoverStart={() => setHoveredCard(app.id)}
                     onHoverEnd={() => setHoveredCard(null)}
-                    onClick={() => setIsMenuModalOpen(true)}
+                    onClick={() => {
+                      if (app.id === 'passwords') {
+                        setIsMenuModalOpen(true)
+                      } else if (app.id === 'budget') {
+                        setIsBudgetMenuModalOpen(true)
+                      }
+                    }}
                     className="relative group cursor-pointer col-span-full"
                   >
                     {/* EXPLOSIVE GLOW EFFECT! */}
@@ -524,6 +557,67 @@ export default function Home() {
         onClose={() => setIsListModalOpen(false)}
         passwords={passwords}
         onDelete={deletePassword}
+      />
+
+      {/* BUDGET MENU MODAL */}
+      <BudgetMenuModal 
+        isOpen={isBudgetMenuModalOpen}
+        onClose={() => setIsBudgetMenuModalOpen(false)}
+        onSelectNew={() => setIsBudgetModalOpen(true)}
+        onSelectView={() => setIsBudgetViewModalOpen(true)}
+        onSelectRecurring={() => setIsRecurringModalOpen(true)}
+        onSelectRecurringList={() => setIsRecurringListModalOpen(true)}
+        onSelectLimit={() => setIsLimitModalOpen(true)}
+        onSelectLimitsList={() => setIsLimitsViewModalOpen(true)}
+      />
+
+      {/* BUDGET MODAL (Add Transaction) */}
+      <BudgetModal 
+        isOpen={isBudgetModalOpen}
+        onClose={() => setIsBudgetModalOpen(false)}
+        onSave={addTransaction}
+      />
+
+      {/* BUDGET VIEW MODAL (View All) */}
+      <BudgetViewModal 
+        isOpen={isBudgetViewModalOpen}
+        onClose={() => setIsBudgetViewModalOpen(false)}
+        transactions={transactions}
+        onDelete={deleteTransaction}
+        stats={getStats()}
+      />
+
+      {/* RECURRING MODAL (Add Recurring) */}
+      <RecurringModal 
+        isOpen={isRecurringModalOpen}
+        onClose={() => setIsRecurringModalOpen(false)}
+        onSave={addRecurring}
+      />
+
+      {/* RECURRING LIST MODAL (Manage Recurring) */}
+      <RecurringListModal 
+        isOpen={isRecurringListModalOpen}
+        onClose={() => setIsRecurringListModalOpen(false)}
+        recurring={recurring}
+        onToggleActive={toggleActive}
+        onDelete={deleteRecurring}
+      />
+
+      {/* BUDGET LIMIT MODAL (Add Limit) */}
+      <BudgetLimitModal 
+        isOpen={isLimitModalOpen}
+        onClose={() => setIsLimitModalOpen(false)}
+        onSave={addLimit}
+        existingCategories={limits.map(l => l.category)}
+      />
+
+      {/* BUDGET LIMITS VIEW MODAL (Manage Limits) */}
+      <BudgetLimitsViewModal 
+        isOpen={isLimitsViewModalOpen}
+        onClose={() => setIsLimitsViewModalOpen(false)}
+        limits={limitsStatus}
+        onToggleActive={toggleLimitActive}
+        onDelete={deleteLimit}
       />
 
       {/* AUTH MODAL! */}
